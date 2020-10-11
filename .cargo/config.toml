@@ -1,0 +1,9 @@
+[build]
+target = "thumbv6m-none-eabi"
+
+[target.thumbv6m-none-eabi]
+runner = "gdb-multiarch -q -x run.gdb"
+rustflags = [
+    # `link.x` is provided by the `cortex_m_rt` crate.
+    "-C", "link-arg=-Tlink.x",
+]
