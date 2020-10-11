@@ -3,8 +3,12 @@
 //! These sensors have an "I²C-compatible" interface supporting bit rates up to 400kHz.
 //!
 //! This driver uses the I²C traits from `embedded_hal`, which currently only support blocking
-//! accesses. Most member functions execute at most one transaction, the longest of which have four
-//! bytes.
+//! accesses. To minimise blocking, each function in this crate executes at most one transaction,
+//! the longest of which transfer four bytes.
+//!
+//! Note that I²C devices can hold the clock, locking up the bus and preventing these blocking I²C
+//! functions from returning. In practice, real devices tend not to do this, but this crate cannot
+//! strictly guarantee that its blocking functions will return at all.
 //!
 //! # Examples
 //!
@@ -29,16 +33,27 @@
 //! ```
 
 #![no_std]
-pub mod error;
-pub mod measurement;
-pub mod mode;
+
+mod error;
+mod measurement;
+
+/// Marker types used to represent the state of the sensor's interface.
+pub mod mode {
+    /// Normal mode, used for starting and retrieving measurements.
+    pub struct Normal;
+
+    /// Command mode, used for configuring the sensor.
+    pub struct Command;
+}
 
 pub use error::Error;
+pub use error::HytError;
 pub use measurement::Measurement;
 
 use core::marker::PhantomData;
 use embedded_hal as hal;
 
+/// The main sensor interface.
 pub struct Hyt<I2C, Mode>
 where
     I2C: hal::blocking::i2c::Read + hal::blocking::i2c::Write,
@@ -61,7 +76,7 @@ where
         }
     }
 
-    /// Set the I²C address explicitly.
+    /// Construct a new `Hyt` interface with the specified I²C address (0x28).
     pub fn with_address(self, address: u8) -> Self {
         Self { address, ..self }
     }
@@ -75,8 +90,8 @@ where
     /// Command mode can only be entered within 10ms of the sensor being powered on. The sensor may
     /// be powered on for some time before the MCU reset. For example, most debuggers and
     /// programmers reset the MCU using a dedicated nRESET pin, without interrupting the power
-    /// supply. If you need to _reliably_ enter command mode, some external logic will be required
-    /// so that the sensor can be properly power-cycled.
+    /// supply. If you need to reliably enter command mode, some external logic will be required so
+    /// that the sensor can be properly power-cycled.
     ///
     /// _**TODO**: Currently unimplemented._
     pub fn enter_command_mode(self) -> Result<Hyt<I2C, mode::Command>, (Self, Error<I2C>)> {
@@ -100,7 +115,7 @@ where
     /// Read the most recent measurement from the sensor.
     ///
     /// If it has already been read (for example because a recently-started measurement has not yet
-    /// completed), the result will be "stale".
+    /// completed), the result will be [_stale_](./struct.Measurement.html#method.is_stale).
     pub fn read(&mut self) -> Result<Measurement, Error<I2C>> {
         // "DF (Data Fetch)"
         // We will read four bytes from the sensor.
@@ -118,6 +133,9 @@ impl<I2C> Hyt<I2C, mode::Command>
 where
     I2C: hal::blocking::i2c::Read + hal::blocking::i2c::Write,
 {
+    /// Attempt to return to normal mode.
+    ///
+    /// _**TODO**: Currently unimplemented._
     pub fn enter_normal_mode(self) -> Result<Hyt<I2C, mode::Normal>, (Self, Error<I2C>)> {
         todo!()
     }

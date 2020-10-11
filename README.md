@@ -9,7 +9,7 @@ modules (HYT221, HYT271 and HYT939).
 ## Minimal example
 
 ```
-let i2c = ...;  // Some embedded_hal I2C device.
+let i2c = ...;  // Some [embedded_hal] I2C device.
 let hyt = ist_hyt::Hyt::new(i2c).start_measurement().unwrap();
 let measurement = loop {
     // Poll until the measurement is ready.
@@ -45,7 +45,7 @@ unstable.
 Known issues:
 
 - Whilst the I²C interface is the same for the whole HYT family, this crate is
-  only known to have been tested with the HYT271.
+  only known to have been tested with the HYT221.
 - Support for "command mode" is not yet unimplemented. Command mode is not
   required for normal operation, but allows configuration, for example, of the
   sensor's I²C address.

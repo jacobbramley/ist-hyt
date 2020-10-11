@@ -4,6 +4,10 @@ use core::convert::TryFrom;
 #[cfg(feature = "i8f24")]
 use fixed::types::I8F24;
 
+/// A single measurement result from the sensor.
+///
+/// This represents a reading of both temperature and humidity, plus some metadata. Accessors are
+/// provided for all meaningful fields.
 #[derive(Clone, Copy, Debug)]
 pub struct Measurement {
     raw: [u8; 4],
@@ -95,17 +99,19 @@ impl Measurement {
     }
 
     /// Calculate the humidity, in %RH, to the nearest integer.
+    // TODO: Make the return type generic.
     pub fn humidity(&self) -> i32 {
         self.humidity_scaled(1).unwrap()
     }
 
     /// Calculate the temperature, in °C, to the nearest integer.
+    // TODO: Make the return type generic.
     pub fn temperature(&self) -> i32 {
         self.temperature_scaled(1).unwrap()
     }
 
     // For constant arguments, the representability check can be optimised out, but only when this
-    // is inlined. Marking this inline typically results in much smaller code overall.
+    // is inlined. Empirically, marking this inline typically results in much smaller code overall.
     #[inline(always)]
     fn value_scaled(raw: u16, min: i16, max: i16, scale: u32) -> Result<i32, HytError> {
         assert!(max > min);
@@ -125,10 +131,12 @@ impl Measurement {
         Ok((((num / u64::from(RAW_VALUE_MAX)) as i64) + min_scaled) as i32)
     }
 
+    /// Extract the raw 14-bit humidity reading.
     fn humidity_raw(&self) -> u16 {
         (((self.raw[0] & 0b0011_1111) as u16) << 8) | (self.raw[1] as u16)
     }
 
+    /// Extract the raw 14-bit temperature reading.
     fn temperature_raw(&self) -> u16 {
         ((self.raw[2] as u16) << 6) | ((self.raw[3] as u16) >> 2)
     }
