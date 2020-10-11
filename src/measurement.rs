@@ -1,9 +1,3 @@
-mod humidity;
-mod temperature;
-
-pub use humidity::Humidity;
-pub use temperature::Temperature;
-
 use crate::error::HytError;
 use core::convert::TryFrom;
 
