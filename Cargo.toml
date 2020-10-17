@@ -31,7 +31,9 @@ version  = "0.1.1"
 features = ["cortex-m"]
 
 [dev-dependencies.lpc8xx-hal]
-version = "0.8.2"
+# The examples depend on a fix that went in after 0.8.2.
+# version = "0.8.2"
+git = "https://github.com/lpc-rs/lpc8xx-hal.git"
 features = ["824m201jdh20"]
 
 [profile.dev]
