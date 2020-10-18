@@ -46,7 +46,7 @@ Known issues:
 
 - Whilst the I²C interface is the same for the whole HYT family, this crate is
   only known to have been tested with the HYT221.
-- Support for "command mode" is not yet unimplemented. Command mode is not
+- Support for "command mode" is not yet implemented. Command mode is not
   required for normal operation, but allows configuration, for example, of the
   sensor's I²C address.
 - There is not yet any support for non-blocking operations. To mitigate
