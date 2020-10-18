@@ -50,7 +50,7 @@ Known issues:
   required for normal operation, but allows configuration, for example, of the
   sensor's I²C address.
 - There is not yet any support for non-blocking operations. To mitigate
-  this, the `start\_measurement()` and `read()` functions are separate, so that
+  this, the `start_measurement()` and `read()` functions are separate, so that
   calling code can do other work whilst the sensor is busy. Note that the
   [embedded-hal] crate doesn't currently provide a non-blocking I²C API.
 - Floating-point results are not supported at all, even on microcontrollers that
