@@ -4,7 +4,7 @@ use core::convert::TryFrom;
 #[cfg(feature = "i8f24")]
 use fixed::types::I8F24;
 
-/// A single measurement result from the sensor.
+/// A single measurement response.
 ///
 /// This represents a reading of both temperature and humidity, plus some metadata. Accessors are
 /// provided for all meaningful fields.
@@ -28,8 +28,10 @@ impl Measurement {
     ///           Stale                                                      Unused
     /// ```
     ///
-    /// This fails (with an appropriate `Err`) if `CMode` (command mode) is set. All other bit
-    /// patterns are considered valid. The unused bits (`raw[3]<1:0>`) are ignored.
+    /// This fails (with an appropriate [`HytError`]) if `CMode` (command mode) is set. All other
+    /// bit patterns are considered valid. The unused bits (`raw[3]<1:0>`) are ignored.
+    ///
+    /// [`HytError`]: ./enum.HytError.html
     pub fn from_raw(raw: [u8; 4]) -> Result<Self, HytError> {
         if raw[0] & 0b1000_0000 == 0 {
             Ok(Self { raw })
@@ -53,6 +55,9 @@ impl Measurement {
     /// The fixed-point result can represent the whole range of results with a worst-case error of
     /// about 0.00024 %RH, which is insignificant compared to the resolution of the reading (about
     /// 0.006 %H) and the accuracy of the sensor (±1.8 %RH).
+    ///
+    ///
+    /// _This requires the "i8f24" feature._
     #[cfg(feature = "i8f24")]
     pub fn humidity_i8f24(&self) -> I8F24 {
         I8F24::from_bits(self.humidity_scaled(1 << 24).unwrap())
@@ -63,6 +68,8 @@ impl Measurement {
     /// The fixed-point result can represent the whole range of results with a worst-case error of
     /// about 0.00031°C, which is insignificant compared to the resolution of the reading (about
     /// 0.01°C) and the accuracy of the sensor (±0.2°C).
+    ///
+    /// _This requires the "i8f24" feature._
     #[cfg(feature = "i8f24")]
     pub fn temperature_i8f24(&self) -> I8F24 {
         I8F24::from_bits(self.temperature_scaled(1 << 24).unwrap())

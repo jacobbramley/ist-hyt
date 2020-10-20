@@ -1,7 +1,7 @@
 # IST HYT Sensor Driver
 
-An I²C driver for [IST]'s [HYT-series][HYT] temperature and humidity sensor
-modules (HYT221, HYT271 and HYT939).
+An I²C driver for [Innovative Sensor Technology IST AG][IST]'s [HYT-series][HYT]
+temperature and humidity sensor modules (HYT221, HYT271 and HYT939).
 
 [IST]: https://www.ist-ag.com/
 [HYT]: https://www.ist-ag.com/sites/default/files/AHHYTM_E.pdf
@@ -9,7 +9,7 @@ modules (HYT221, HYT271 and HYT939).
 ## Minimal example
 
 ```
-let i2c = ...;  // Some [embedded_hal] I2C device.
+let i2c = ...;  // Some embedded-hal I²C device.
 let hyt = ist_hyt::Hyt::new(i2c).start_measurement().unwrap();
 let measurement = loop {
     // Poll until the measurement is ready.

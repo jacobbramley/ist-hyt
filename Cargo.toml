@@ -9,6 +9,10 @@ edition = "2018"
 license = "MIT"
 readme = "README.md"
 
+[package.metadata.docs.rs]
+features = ["i8f24"]
+targets = ["thumbv6m-none-eabi", "thumbv7m-none-eabi"]
+
 [dependencies]
 embedded-hal = "0.2.4"
 

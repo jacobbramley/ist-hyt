@@ -1,18 +1,25 @@
-//! IST HYT221 / HYT271 / HYT939 humidity and temperature sensor driver.
+//! An I²C driver for [Innovative Sensor Technology IST AG][IST]'s [HYT-series][HYT] temperature
+//! and humidity sensor modules (HYT221, HYT271 and HYT939).
 //!
 //! These sensors have an "I²C-compatible" interface supporting bit rates up to 400kHz.
 //!
-//! This driver uses the I²C traits from `embedded_hal`, which currently only support blocking
-//! accesses. To minimise blocking, each function in this crate executes at most one transaction,
-//! the longest of which transfer four bytes.
+//! This driver uses the I²C traits from [`embedded-hal`][hal_i2c], which currently only support
+//! blocking accesses. To minimise blocking, each function in this crate executes at most one
+//! transaction, the longest of which transfer four bytes.
 //!
-//! Note that I²C devices can hold the clock, locking up the bus and preventing these blocking I²C
-//! functions from returning. In practice, real devices tend not to do this, but this crate cannot
-//! strictly guarantee that its blocking functions will return at all.
+//! Note that I²C devices can [lock up the bus], preventing these blocking I²C functions from
+//! returning. This crate cannot strictly guarantee that its blocking I²C functions will return at
+//! all.
+//!
+//! [lock up the bus]: https://www.i2c-bus.org/i2c-primer/analysing-obscure-problems/blocked-bus/
+//! [hal_i2c]: https://docs.rs/embedded-hal/0.2.4/embedded_hal/blocking/i2c/index.html
+//! [IST]: https://www.ist-ag.com/
+//! [HYT]: https://www.ist-ag.com/sites/default/files/AHHYTM_E.pdf
 //!
 //! # Examples
 //!
 //! ```
+//! let i2c = ...;  // Some embedded-hal I²C device.
 //! let hyt = ist_hyt::Hyt::new(i2c).start_measurement().unwrap();
 //! ... // Wait
 //! // The measurement is specified to take 60-100ms, but empirically, it's often ready before
@@ -31,6 +38,28 @@
 //! let humidity = measurement.humidity();
 //! let temperature = measurement.temperature();
 //! ```
+//!
+//! # Status
+//!
+//! This crate is in early development and its API should be considered to be
+//! unstable.
+//!
+//! Known issues:
+//!
+//! - Whilst the I²C interface is the same for the whole HYT family, this crate is
+//!   only known to have been tested with the HYT221.
+//! - Support for "command mode" is not yet implemented. Command mode is not
+//!   required for normal operation, but allows configuration, for example, of the
+//!   sensor's I²C address.
+//! - There is not yet any support for non-blocking operations. To mitigate
+//!   this, the `start_measurement()` and `read()` functions are separate, so that
+//!   calling code can do other work whilst the sensor is busy. Note that the
+//!   [embedded-hal] crate doesn't currently provide a non-blocking I²C API.
+//! - Floating-point results are not supported at all, even on microcontrollers that
+//!   can handle them.
+//! - `cargo test` doesn't do anything useful at the moment.
+//!
+//! [embedded-hal]: https://docs.rs/embedded-hal/0.2.4/embedded_hal/
 
 #![no_std]
 
@@ -76,7 +105,7 @@ where
         }
     }
 
-    /// Construct a new `Hyt` interface with the specified I²C address (0x28).
+    /// Construct a new `Hyt` interface with the specified I²C address.
     pub fn with_address(self, address: u8) -> Self {
         Self { address, ..self }
     }
@@ -100,8 +129,8 @@ where
 
     /// Start a measurement.
     ///
-    /// According to the datasheet, it takes 60-100ms for the result to be ready, though it is
-    /// possible to poll the sensor if latency is important.
+    /// According to the datasheet, it takes 60-100ms for the result to be ready, but in practice
+    /// it is often ready after about 40ms.
     pub fn start_measurement(&mut self) -> Result<(), Error<I2C>> {
         // "MR (Measurement Request)"
         // This is a simple I²C write, but with no data.
