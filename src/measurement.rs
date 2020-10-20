@@ -54,7 +54,7 @@ impl Measurement {
     ///
     /// The fixed-point result can represent the whole range of results with a worst-case error of
     /// about 0.00024 %RH, which is insignificant compared to the resolution of the reading (about
-    /// 0.006 %H) and the accuracy of the sensor (±1.8 %RH).
+    /// 0.006 %RH) and the accuracy of the sensor (±1.8 %RH).
     ///
     ///
     /// _This requires the "i8f24" feature._
