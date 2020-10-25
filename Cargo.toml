@@ -42,12 +42,12 @@ features = ["824m201jdh20"]
 
 [profile.dev]
 debug = true
-panic = "abort"
+# Optimise a bit so we can fit on the target.
+opt-level = "z"
 
 [profile.release]
 debug = true
-panic = "abort"
-lto = true
+codegen-units = 1
 opt-level = "z"
 
 [features]
