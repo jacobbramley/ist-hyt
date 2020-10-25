@@ -22,6 +22,8 @@ let humidity = measurement.humidity();
 let temperature = measurement.temperature();
 ```
 
+See [`examples/measure.rs`](examples/measure.rs) for a full working example.
+
 ## Measurement formats
 
 For simplicity, the basic `humidity()` and `temperature()` functions return

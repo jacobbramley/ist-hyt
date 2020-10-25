@@ -1,3 +1,10 @@
+//! Log measurements over [RTT].
+//!
+//! This run on an LPC824 ("824m201jdh20") with the sensor connected to the preferred (true
+//! open-drain) I²C pins, P0_10 and P0_11.
+//!
+//! [RTT]: https://crates.io/crates/rtt-target
+
 #![no_main]
 #![no_std]
 
